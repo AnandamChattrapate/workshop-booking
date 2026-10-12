@@ -1,0 +1,48 @@
+# Default: only PostgreSQL runs in Docker. Run backend and frontend with npm.
+# Optional: `docker compose --profile full up` runs everything in Docker.
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: workshop
+    ports:
+      - "${DB_PORT:-5433}:5432"
+    volumes:
+      - ./backend/db/create-test-db.sql:/docker-entrypoint-initdb.d/create-test-db.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d workshop"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  backend:
+    profiles: [full]
+    build: ./backend
+    environment:
+      DATABASE_URL: postgres://postgres:postgres@db:5432/workshop
+      TEST_DATABASE_URL: postgres://postgres:postgres@db:5432/workshop_test
+      JWT_SECRET: local-dev-secret-change-me
+      PORT: "4000"
+    ports:
+      - "${API_PORT:-4000}:4000"
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    profiles: [full]
+    build: ./frontend
+    environment:
+      API_URL: http://backend:4000
+    ports:
+      - "${APP_PORT:-3000}:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend

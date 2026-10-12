@@ -1,0 +1,22 @@
+{
+  "name": "workshop-booking-backend",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch-path=./src src/index.js",
+    "start": "node src/index.js",
+    "test": "vitest run",
+    "db:reset": "node db/reset.js"
+  },
+  "dependencies": {
+    "bcryptjs": "2.4.3",
+    "express": "4.21.2",
+    "jsonwebtoken": "9.0.2",
+    "pg": "8.13.1"
+  },
+  "devDependencies": {
+    "supertest": "7.0.0",
+    "vitest": "2.1.8"
+  }
+}
